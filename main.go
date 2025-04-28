@@ -1,0 +1,34 @@
+package main
+
+import (
+	"fmt"
+	"os"
+
+	"minigit/cmd"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Please provide a command. See 'minigit help'")
+		return
+	}
+
+	switch os.Args[1] {
+	case "branch":
+		branchName := ""
+		if len(os.Args) >= 3 {
+			branchName = os.Args[2]
+		}
+		cmd.Branch(branchName)
+
+	case "checkout":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: minigit checkout <branchname>")
+			return
+		}
+		cmd.Checkout(os.Args[2])
+
+	default:
+		fmt.Println("Unknown command. See 'minigit help'")
+	}
+}
