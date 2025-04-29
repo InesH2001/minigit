@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"minigit/cmd"
+	"os"
 )
 
 func main() {
@@ -14,6 +13,9 @@ func main() {
 	}
 
 	switch os.Args[1] {
+	case "init":
+		cmd.InitCommand()
+
 	case "branch":
 		branchName := ""
 		if len(os.Args) >= 3 {
