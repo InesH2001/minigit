@@ -2,10 +2,10 @@ package core
 
 import (
 	"fmt"
+	"minigit/utils"
 	"os"
 	"strings"
 	"time"
-	"minigit/utils"
 )
 
 type CommitParams struct {

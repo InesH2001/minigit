@@ -16,6 +16,13 @@ func main() {
 	case "init":
 		cmd.InitCommand()
 
+	case "add":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: minigit add <file1> <file2> ... or '.' for all")
+			return
+		}
+		cmd.Add(os.Args[2:])
+
 	case "commit":
 		cmd.CommitCommand(os.Args[2:])
 
