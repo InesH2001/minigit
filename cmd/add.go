@@ -15,18 +15,18 @@ func Add(args []string) {
 	if args[0] == "." {
 		files, err := utils.ListFilesRecursive(".")
 		if err != nil {
-			fmt.Println("Erreur lors de la lecture des fichiers :", err)
+			fmt.Println("Error in loading file :", err)
 			return
 		}
 		for _, f := range files {
 			if err := core.Add(f); err != nil {
-				fmt.Printf("Erreur lors de l'ajout de %s : %v\n", f, err)
+				fmt.Printf("Error in adding file %s : %v\n", f, err)
 			}
 		}
 	} else {
 		for _, f := range args {
 			if err := core.Add(f); err != nil {
-				fmt.Printf("Erreur lors de l'ajout de %s : %v\n", f, err)
+				fmt.Printf("Erreur in adding file %s : %v\n", f, err)
 			}
 		}
 	}

@@ -9,7 +9,7 @@ import (
 
 func Add(filePath string) error {
 	if !utils.FileExists(filePath) {
-		fmt.Printf("Ignoré : %s (n'existe pas)\n", filePath)
+		fmt.Printf("Ignore : %s (n'existe pas)\n", filePath)
 		return nil
 	}
 
@@ -22,7 +22,7 @@ func Add(filePath string) error {
 	index := utils.ReadIndex()
 
 	if currentHash, ok := index[filePath]; ok && currentHash == hash {
-		fmt.Printf("Inchangé : %s\n", filePath)
+		fmt.Printf("Inchange : %s\n", filePath)
 		return nil
 	}
 
@@ -32,7 +32,7 @@ func Add(filePath string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Blob créé : %s\n", hash)
+		fmt.Printf("Blob create : %s\n", hash)
 	}
 
 	index[filePath] = hash
@@ -40,6 +40,6 @@ func Add(filePath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Ajouté : %s\n", filePath)
+	fmt.Printf("Add : %s\n", filePath)
 	return nil
 }
