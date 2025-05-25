@@ -32,6 +32,11 @@ func InitRepo() error {
 		return fmt.Errorf("error creating HEAD file: %v", err)
 	}
 
-	fmt.Println("miniGit correctely initizalized")
+	indexPath := filepath.Join(miniGitPath, "index")
+	if err := os.WriteFile(indexPath, []byte(""), 0644); err != nil {
+		return fmt.Errorf("error creating index file: %v", err)
+	}
+
+	fmt.Println("miniGit correctly initialized")
 	return nil
 }

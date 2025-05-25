@@ -20,7 +20,7 @@ func ListFilesRecursive(root string) ([]string, error) {
 			return nil
 		}
 
-		if strings.Contains(path, "/.mgit") {
+		if strings.Contains(path, "/.miniGit") {
 			return nil
 		}
 

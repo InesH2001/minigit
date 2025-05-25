@@ -2,15 +2,14 @@ package core
 
 import (
 	"fmt"
+	"minigit/utils"
 	"os"
 	"path/filepath"
-
-	"minigit/utils"
 )
 
 func Add(filePath string) error {
 	if !utils.FileExists(filePath) {
-		fmt.Printf("⚠️  Ignoré : %s (n'existe pas)\n", filePath)
+		fmt.Printf("Ignoré : %s (n'existe pas)\n", filePath)
 		return nil
 	}
 
@@ -27,13 +26,13 @@ func Add(filePath string) error {
 		return nil
 	}
 
-	blobPath := filepath.Join(".mgit", "objects", "blob", hash)
+	blobPath := filepath.Join(".miniGit", "objects", "blob", hash)
 	if !utils.FileExists(blobPath) {
 		err := os.WriteFile(blobPath, content, 0644)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("🆕 Blob créé : %s\n", hash)
+		fmt.Printf("Blob créé : %s\n", hash)
 	}
 
 	index[filePath] = hash

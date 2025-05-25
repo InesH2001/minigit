@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-
 	"minigit/core"
 	"minigit/utils"
 )
@@ -20,11 +19,15 @@ func Add(args []string) {
 			return
 		}
 		for _, f := range files {
-			core.Add(f)
+			if err := core.Add(f); err != nil {
+				fmt.Printf("Erreur lors de l'ajout de %s : %v\n", f, err)
+			}
 		}
 	} else {
 		for _, f := range args {
-			core.Add(f)
+			if err := core.Add(f); err != nil {
+				fmt.Printf("Erreur lors de l'ajout de %s : %v\n", f, err)
+			}
 		}
 	}
 }
