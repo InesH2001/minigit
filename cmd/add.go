@@ -8,7 +8,7 @@ import (
 
 func Add(args []string) {
 	if len(args) == 0 {
-		fmt.Println("Usage : mgit add <fichier|.>")
+		fmt.Println("Usage : mgit add <file|.>")
 		return
 	}
 

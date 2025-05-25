@@ -9,7 +9,7 @@ import (
 
 func Add(filePath string) error {
 	if !utils.FileExists(filePath) {
-		fmt.Printf("Ignore : %s (n'existe pas)\n", filePath)
+		fmt.Printf("Ignore : %s (Don't exist)\n", filePath)
 		return nil
 	}
 
