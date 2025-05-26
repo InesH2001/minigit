@@ -9,12 +9,12 @@ import (
 
 func Branch(name string) {
 	if name == "" {
-		branches, err := filepath.Glob(".minigit/refs/heads/*")
+		branches, err := filepath.Glob(".miniGit/refs/heads/*")
 		if err != nil {
 			panic(err)
 		}
 
-		headData, err := os.ReadFile(".minigit/HEAD")
+		headData, err := os.ReadFile(".miniGit/HEAD")
 		if err != nil {
 			panic(err)
 		}
@@ -34,7 +34,7 @@ func Branch(name string) {
 		return
 	}
 
-	headData, err := os.ReadFile(".minigit/HEAD")
+	headData, err := os.ReadFile(".miniGit/HEAD")
 	if err != nil {
 		panic(err)
 	}
@@ -44,13 +44,13 @@ func Branch(name string) {
 	}
 	refPath := strings.TrimPrefix(headRef, "ref: ")
 
-	commitHashBytes, err := os.ReadFile(".minigit/" + refPath)
+	commitHashBytes, err := os.ReadFile(".miniGit/" + refPath)
 	if err != nil {
 		panic(err)
 	}
 	commitHash := strings.TrimSpace(string(commitHashBytes))
 
-	err = os.WriteFile(".minigit/refs/heads/"+name, []byte(commitHash), 0644)
+	err = os.WriteFile(".miniGit/refs/heads/"+name, []byte(commitHash), 0644)
 	if err != nil {
 		panic(err)
 	}

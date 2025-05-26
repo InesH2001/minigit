@@ -39,6 +39,13 @@ func main() {
 			return
 		}
 		cmd.Checkout(os.Args[2])
+	
+	case "merge":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: minigit merge <branch_name>")
+			return
+		}
+		cmd.Merge(os.Args[2])
 
 	default:
 		fmt.Println("Unknown command. See 'minigit help'")
