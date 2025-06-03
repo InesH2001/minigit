@@ -7,7 +7,7 @@ import (
 )
 
 func Checkout(name string) {
-	branchPath := ".minigit/refs/heads/" + name
+	branchPath := ".miniGit/refs/heads/" + name
 
 	commitHashBytes, err := os.ReadFile(branchPath)
 	if err != nil {
@@ -16,7 +16,7 @@ func Checkout(name string) {
 	commitHash := strings.TrimSpace(string(commitHashBytes))
 
 	headContent := "ref: refs/heads/" + name
-	err = os.WriteFile(".minigit/HEAD", []byte(headContent), 0644)
+	err = os.WriteFile(".miniGit/HEAD", []byte(headContent), 0644)
 	if err != nil {
 		panic(err)
 	}

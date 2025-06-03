@@ -9,7 +9,7 @@ import (
 
 func ReadIndex() map[string]string {
 	index := make(map[string]string)
-	file, err := os.Open(".minigit/index")
+	file, err := os.Open(".miniGit/index")
 	if err != nil {
 		return index
 	}
@@ -26,7 +26,7 @@ func ReadIndex() map[string]string {
 }
 
 func WriteIndex(index map[string]string) error {
-	f, err := os.Create(".minigit/index")
+	f, err := os.Create(".miniGit/index")
 	if err != nil {
 		return err
 	}
