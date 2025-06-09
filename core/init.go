@@ -15,9 +15,9 @@ func InitRepo() error {
 
 	dirs := []string{
 		filepath.Join(miniGitPath, "objects"),
-		filepath.Join(miniGitPath, "objects/blob"),
-		filepath.Join(miniGitPath, "objects/commit"),
-		filepath.Join(miniGitPath, "objects/tree"),
+		filepath.Join(miniGitPath, "objects/blobs"),
+		filepath.Join(miniGitPath, "objects/commits"),
+		filepath.Join(miniGitPath, "objects/trees"),
 		filepath.Join(miniGitPath, "refs", "heads"),
 	}
 

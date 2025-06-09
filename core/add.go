@@ -26,7 +26,7 @@ func Add(filePath string) error {
 		return nil
 	}
 
-	blobPath := filepath.Join(".miniGit", "objects", "blob", hash)
+	blobPath := filepath.Join(".miniGit", "objects", "blobs", hash)
 	if !utils.FileExists(blobPath) {
 		err := os.WriteFile(blobPath, content, 0644)
 		if err != nil {
