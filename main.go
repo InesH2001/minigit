@@ -23,6 +23,9 @@ func main() {
 		}
 		cmd.Add(os.Args[2:])
 
+	case "diff":
+		cmd.DiffCommand()
+
 	case "commit":
 		cmd.CommitCommand(os.Args[2:])
 
