@@ -56,3 +56,11 @@ func getDir(path string) string {
 	}
 	return path[:lastSlash]
 }
+
+func ListFiles() []string {
+	files, err := ListFilesRecursive(".")
+	if err != nil {
+		return []string{}
+	}
+	return files
+}

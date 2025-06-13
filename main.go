@@ -29,6 +29,9 @@ func main() {
 	case "commit":
 		cmd.CommitCommand(os.Args[2:])
 
+	case "status":
+		cmd.RunStatus()
+
 	case "branch":
 		branchName := ""
 		if len(os.Args) >= 3 {
