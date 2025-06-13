@@ -32,6 +32,9 @@ func main() {
 	case "status":
 		cmd.RunStatus()
 
+	case "log":
+		cmd.RunLog()
+
 	case "branch":
 		branchName := ""
 		if len(os.Args) >= 3 {
@@ -45,7 +48,7 @@ func main() {
 			return
 		}
 		cmd.Checkout(os.Args[2])
-	
+
 	case "merge":
 		if len(os.Args) < 3 {
 			fmt.Println("Usage: minigit merge <branch_name>")
