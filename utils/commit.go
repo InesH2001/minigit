@@ -14,15 +14,21 @@ func ReadLastCommit() map[string]string {
 		return result
 	}
 
-	branch := strings.TrimSpace(string(headData))
-	refPath := ".miniGit/refs/" + branch
+	headContent := strings.TrimSpace(string(headData))
 
-	commitHashBytes, err := os.ReadFile(refPath)
-	if err != nil {
-		return result
+	var commitHash string
+	if strings.HasPrefix(headContent, "ref: ") {
+		ref := strings.TrimPrefix(headContent, "ref: ")
+		refPath := ".miniGit/" + ref
+		hashBytes, err := os.ReadFile(refPath)
+		if err != nil {
+			return result
+		}
+		commitHash = strings.TrimSpace(string(hashBytes))
+	} else {
+		commitHash = headContent
 	}
 
-	commitHash := strings.TrimSpace(string(commitHashBytes))
 	commitPath := ".miniGit/objects/commits/" + commitHash
 
 	f, err := os.Open(commitPath)
