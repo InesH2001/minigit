@@ -35,6 +35,10 @@ func main() {
 	case "log":
 		cmd.RunLog()
 
+
+	case "reset":
+		cmd.RunReset()
+
 	case "branch":
 		branchName := ""
 		if len(os.Args) >= 3 {
