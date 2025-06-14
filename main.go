@@ -41,9 +41,6 @@ func main() {
 	case "help":
 		cmd.Help()
 
-	case "reset":
-		cmd.RunReset()
-
 	case "branch":
 		branchName := ""
 		if len(os.Args) >= 3 {
