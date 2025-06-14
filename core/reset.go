@@ -9,7 +9,7 @@ import (
 )
 
 func Reset(commitHash string) error {
-	commitPath := ".minigit/objects/commits/" + commitHash
+	commitPath := ".miniGit/objects/commits/" + commitHash
 	data, err := os.ReadFile(commitPath)
 	if err != nil {
 		return fmt.Errorf("commit %s not found (%v)", commitHash, err)
@@ -29,7 +29,7 @@ func Reset(commitHash string) error {
 		return fmt.Errorf("tree not found in commit %s", commitHash)
 	}
 
-	treePath := ".minigit/objects/trees/" + treeHash
+	treePath := ".miniGit/objects/trees/" + treeHash
 	treeData, err := os.ReadFile(treePath)
 	if err != nil {
 		return fmt.Errorf("tree %s not found (%v)", treeHash, err)
@@ -49,7 +49,7 @@ func Reset(commitHash string) error {
 		filePath := parts[0]
 		hash := parts[1]
 
-		content, err := os.ReadFile(".minigit/objects/blobs/" + hash)
+		content, err := os.ReadFile(".miniGit/objects/blobs/" + hash)
 		if err != nil {
 			return fmt.Errorf("missing blob: %s (%v)", hash, err)
 		}
@@ -65,12 +65,12 @@ func Reset(commitHash string) error {
 		return fmt.Errorf("failed to update index: %v", err)
 	}
 
-	headData, err := os.ReadFile(".minigit/HEAD")
+	headData, err := os.ReadFile(".miniGit/HEAD")
 	if err != nil {
 		return fmt.Errorf("failed to read HEAD (%v)", err)
 	}
 	ref := strings.TrimPrefix(strings.TrimSpace(string(headData)), "ref: ")
-	if err := utils.WriteFile(".minigit/"+ref, []byte(commitHash)); err != nil {
+	if err := utils.WriteFile(".miniGit/"+ref, []byte(commitHash)); err != nil {
 		return fmt.Errorf("failed to update HEAD ref: %v", err)
 	}
 

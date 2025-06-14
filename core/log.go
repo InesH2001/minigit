@@ -8,7 +8,7 @@ import (
 )
 
 func Log() error {
-	headData, err := os.ReadFile(".minigit/HEAD")
+	headData, err := os.ReadFile(".miniGit/HEAD")
 	if err != nil {
 		return fmt.Errorf("failed to read HEAD: %v", err)
 	}
@@ -17,7 +17,7 @@ func Log() error {
 
 	var commitHash string
 	if strings.HasPrefix(headRef, "ref: ") {
-		refPath := ".minigit/" + strings.TrimPrefix(headRef, "ref: ")
+		refPath := ".miniGit/" + strings.TrimPrefix(headRef, "ref: ")
 		hashBytes, err := os.ReadFile(refPath)
 		if err != nil {
 			return fmt.Errorf("failed to read ref file: %v", err)
@@ -28,7 +28,7 @@ func Log() error {
 	}
 
 	for commitHash != "" {
-		commitPath := ".minigit/objects/commits/" + commitHash
+		commitPath := ".miniGit/objects/commits/" + commitHash
 		file, err := os.Open(commitPath)
 		if err != nil {
 			break
