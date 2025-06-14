@@ -65,6 +65,13 @@ func main() {
 		}
 		cmd.Merge(os.Args[2])
 
+	case "revert":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: minigit revert <commit_hash>")
+			return
+		}
+		cmd.Revert(os.Args[2:])
+
 	default:
 		fmt.Println("Unknown command. See 'minigit help'")
 	}
