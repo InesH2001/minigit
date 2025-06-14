@@ -6,7 +6,7 @@ import (
 )
 
 func GetCurrentBranch() string {
-	data, err := os.ReadFile(".minigit/HEAD")
+	data, err := os.ReadFile(".miniGit/HEAD")
 	if err != nil {
 		return "unknown"
 	}

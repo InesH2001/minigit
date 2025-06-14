@@ -9,13 +9,13 @@ import (
 func ReadLastCommit() map[string]string {
 	result := make(map[string]string)
 
-	headData, err := os.ReadFile(".minigit/HEAD")
+	headData, err := os.ReadFile(".miniGit/HEAD")
 	if err != nil {
 		return result
 	}
 
 	branch := strings.TrimSpace(string(headData))
-	refPath := ".minigit/refs/" + branch
+	refPath := ".miniGit/refs/" + branch
 
 	commitHashBytes, err := os.ReadFile(refPath)
 	if err != nil {
@@ -23,7 +23,7 @@ func ReadLastCommit() map[string]string {
 	}
 
 	commitHash := strings.TrimSpace(string(commitHashBytes))
-	commitPath := ".minigit/objects/commits/" + commitHash
+	commitPath := ".miniGit/objects/commits/" + commitHash
 
 	f, err := os.Open(commitPath)
 	if err != nil {
