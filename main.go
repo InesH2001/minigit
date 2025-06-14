@@ -35,6 +35,7 @@ func main() {
 	case "log":
 		cmd.RunLog()
 
+
 	case "reset":
 		cmd.RunReset()
 
