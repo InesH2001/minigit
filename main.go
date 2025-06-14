@@ -15,6 +15,12 @@ func main() {
 	switch os.Args[1] {
 	case "init":
 		cmd.InitCommand()
+	
+	case "set-user":
+    	cmd.SetUserCommand(os.Args[2:])	
+	
+	case "get-user":
+    	cmd.GetUserCommand()
 
 	case "add":
 		if len(os.Args) < 3 {

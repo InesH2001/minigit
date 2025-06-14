@@ -37,6 +37,9 @@ func InitRepo() error {
 		return fmt.Errorf("error creating index file: %v", err)
 	}
 
-	fmt.Println("miniGit correctly initialized")
+	if err := StoreUsername(); err != nil {
+		return fmt.Errorf("failed to store username: %v", err)
+	}
+
 	return nil
 }
