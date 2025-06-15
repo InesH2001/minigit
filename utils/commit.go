@@ -4,7 +4,31 @@ import (
 	"bufio"
 	"os"
 	"strings"
+	"fmt"
 )
+
+func GetCommitHashFromRef(ref string) (string, error) {
+	data, err := os.ReadFile(".miniGit/" + ref)
+	if err != nil {
+		return "", fmt.Errorf("failed to read ref %s: %w", ref, err)
+	}
+	return strings.TrimSpace(string(data)), nil
+}
+
+func GetParentsFromCommit(commitHash string) []string {
+    data, _ := os.ReadFile("./miniGit/objects/commits/" + commitHash)
+    lines := strings.Split(string(data), "\n")
+    var parents []string
+
+    for _, line := range lines {
+        if strings.HasPrefix(line, "parent: ") {
+            parentHash := strings.TrimSpace(strings.TrimPrefix(line, "parent: "))
+            parents = append(parents, parentHash)
+        }
+    }
+
+    return parents
+}
 
 func ReadLastCommit() map[string]string {
 	result := make(map[string]string)

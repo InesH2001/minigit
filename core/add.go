@@ -42,7 +42,10 @@ func Add(filePath string) error {
 	}
 
 	hash := utils.HashContent(content)
-	index := utils.ReadIndex()
+	index, err := utils.ReadIndex()
+	if err != nil {
+		return err
+	}
 
 	if currentHash, ok := index[filePath]; ok && currentHash == hash {
 		fmt.Printf("Unchanged : %s\n", filePath)

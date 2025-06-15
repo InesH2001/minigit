@@ -76,7 +76,7 @@ func readTree(treeHash string) (map[string]string, error) {
 func restoreFiles(tree map[string]string) (map[string]string, error) {
 	index := make(map[string]string)
 	for path, hash := range tree {
-		content := getBlobContent(hash)
+		content := utils.GetBlobContent(hash)
 		err := os.WriteFile(path, []byte(content), 0644)
 		if err != nil {
 			return nil, fmt.Errorf("failed to restore %s: %w", path, err)
