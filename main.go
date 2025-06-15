@@ -74,6 +74,13 @@ func main() {
 			return
 		}
 		cmd.Revert(os.Args[2:])
+	
+	case "rm":
+		if len(os.Args) < 1 {
+			fmt.Println("Usage: minigit rm [--cached] [-f] <file>")
+			return
+		}
+		cmd.RmCommand(os.Args[2:])
 
 	default:
 		fmt.Println("Unknown command. See 'minigit help'")

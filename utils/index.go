@@ -1,28 +1,29 @@
 package utils
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strings"
 )
 
-func ReadIndex() map[string]string {
-	index := make(map[string]string)
-	file, err := os.Open(".miniGit/index")
+func ReadIndex() (map[string]string, error) {
+	content, err := os.ReadFile(".miniGit/index")
 	if err != nil {
-		return index
+		return nil, fmt.Errorf("failed to read index: %w", err)
 	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		parts := strings.Split(scanner.Text(), " ")
-		if len(parts) == 2 {
-			index[parts[0]] = parts[1]
+	lines := strings.Split(string(content), "\n")
+	index := make(map[string]string)
+	for _, line := range lines {
+		if line == "" {
+			continue
 		}
+		parts := strings.SplitN(line, " ", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		index[parts[0]] = parts[1]
 	}
-	return index
+	return index, nil
 }
 
 func WriteIndex(index map[string]string) error {

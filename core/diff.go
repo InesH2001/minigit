@@ -9,7 +9,10 @@ import (
 )
 
 func Diff() error {
-	index := utils.ReadIndex()
+	index, err := utils.ReadIndex()
+	if err != nil {
+		return err
+	}
 
 	for filePath, hash := range index {
 		currentContent, err := os.ReadFile(filePath)

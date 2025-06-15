@@ -11,22 +11,32 @@ func Merge(branchName string) error {
     hasConflict := false
     modifiedFiles := []string{}
 
-    currentBranch := getCurrentBranchRefPath()
+    currentBranch, err := utils.GetCurrentBranchRefPath()
+	if err != nil {
+		return err
+	}
 
-    headCommitHash := getCommitHashFromRef(currentBranch)
-    branchCommitHash := getCommitHashFromRef("refs/heads/" + branchName)
+    headCommitHash, err := utils.GetCommitHashFromRef(currentBranch)
+    if err != nil {
+        return err
+    }
+
+    branchCommitHash, err := utils.GetCommitHashFromRef("refs/heads/" + branchName)
+    if err != nil {
+        return err
+    }
     commonAncestorHash := findCommonCommitAncestorHash(headCommitHash, branchCommitHash)
 
-    headBlobs := readTreeFromCommit(headCommitHash)
-    branchBlobs := readTreeFromCommit(branchCommitHash)
-    baseBlobs := readTreeFromCommit(commonAncestorHash)
+    headBlobs := utils.ReadTreeFromCommit(headCommitHash)
+    branchBlobs := utils.ReadTreeFromCommit(branchCommitHash)
+    baseBlobs := utils.ReadTreeFromCommit(commonAncestorHash)
 
-    allFiles := getUniqueUnionKeys(headBlobs, branchBlobs, baseBlobs)
+    allFiles := utils.GetUniqueUnionKeys(headBlobs, branchBlobs, baseBlobs)
 
     for _, file := range allFiles {
-        base := getBlobContent(baseBlobs[file])
-        head := getBlobContent(headBlobs[file])
-        branch := getBlobContent(branchBlobs[file])
+        base := utils.GetBlobContent(baseBlobs[file])
+        head := utils.GetBlobContent(headBlobs[file])
+        branch := utils.GetBlobContent(branchBlobs[file])
 
         merged := mergeThreeVersions(base, head, branch, branchName)
 
@@ -113,7 +123,7 @@ func findCommonCommitAncestorHash(commit1, commit2 string) string {
         queue = queue[1:]
         visited[current] = true
 
-        parents := getParentsFromCommit(current)
+        parents := utils.GetParentsFromCommit(current)
         queue = append(queue, parents...)
     }
 
@@ -126,7 +136,7 @@ func findCommonCommitAncestorHash(commit1, commit2 string) string {
             return current
         }
 
-        parents := getParentsFromCommit(current)
+        parents := utils.GetParentsFromCommit(current)
         queue = append(queue, parents...)
     }
 

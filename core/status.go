@@ -7,11 +7,18 @@ import (
 )
 
 func Status() error {
-	index := utils.ReadIndex()
+	index, err := utils.ReadIndex()
+	if err != nil {
+		return err
+	}
 	lastCommit := utils.ReadLastCommit()
 	workingFiles := utils.ListFiles()
 
-	currentBranch := utils.GetCurrentBranch()
+	currentBranch, err := utils.GetCurrentBranch()
+	if err != nil {
+		return err
+	}
+	
 	fmt.Printf("On branch %s\n\n", currentBranch)
 
 	fmt.Println("Changes to be committed:")

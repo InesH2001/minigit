@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"minigit/utils"
-	"os"
 	"strings"
 	"time"
 )
@@ -14,22 +13,23 @@ type CommitParams struct {
 }
 
 func Commit(params CommitParams) error {
-	index, err := readIndexFile()
+	index, err := utils.ReadIndex()
+	if err != nil {
+		return err
+	}
+	
+	headRef, parentHash, err := utils.GetCurrentBranchAndParentCommitHash()
 	if err != nil {
 		return err
 	}
 
-	treeContent := buildTree(index)
+	treeContent := buildTree(index, parentHash)
 	treeHash := utils.HashContent([]byte(treeContent))
 
-	if err := writeTree(treeHash, treeContent); err != nil {
+	if err := utils.WriteTree(treeHash, treeContent); err != nil {
 		return err
 	}
 
-	headRef, parentHash, err := readHeadAndParent()
-	if err != nil {
-		return err
-	}
 
 	commitContent := buildCommit(params, treeHash, parentHash)
 	commitHash := utils.HashContent([]byte(commitContent))
@@ -50,52 +50,22 @@ func Commit(params CommitParams) error {
 	return nil
 }
 
-func readIndexFile() (map[string]string, error) {
-	content, err := os.ReadFile(".miniGit/index")
-	if err != nil {
-		return nil, fmt.Errorf("failed to read index: %w", err)
-	}
-	lines := strings.Split(string(content), "\n")
-	index := make(map[string]string)
-	for _, line := range lines {
-		if line == "" {
-			continue
-		}
-		parts := strings.SplitN(line, " ", 2)
-		if len(parts) != 2 {
-			continue
-		}
-		index[parts[0]] = parts[1]
-	}
-	return index, nil
-}
+func buildTree(index map[string]string, parentHash string) string {
+	previousTree := utils.ReadTreeFromCommit(parentHash)
 
-func buildTree(index map[string]string) string {
+	for file, hash := range index {
+		if hash == "" {
+			delete(previousTree, file)
+		} else {
+			previousTree[file] = hash
+		}
+	}
+
 	var builder strings.Builder
-	for path, hash := range index {
+	for path, hash := range previousTree {
 		builder.WriteString(fmt.Sprintf("%s %s\n", path, hash))
 	}
 	return builder.String()
-}
-
-func writeTree(treeHash, content string) error {
-	return utils.WriteFile(".miniGit/objects/trees/"+treeHash, []byte(content))
-}
-
-func readHeadAndParent() (string, string, error) {
-	headContent, err := os.ReadFile(".miniGit/HEAD")
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read HEAD: %w", err)
-	}
-	headRef := strings.TrimPrefix(string(headContent), "ref: ")
-	headRef = strings.TrimSpace(headRef)
-
-	parentHash := ""
-	parentPath := ".miniGit/" + headRef
-	if data, err := os.ReadFile(parentPath); err == nil {
-		parentHash = strings.TrimSpace(string(data))
-	}
-	return headRef, parentHash, nil
 }
 
 func buildCommit(params CommitParams, treeHash, parentHash string) string {
