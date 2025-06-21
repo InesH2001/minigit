@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"minigit/cmd"
 	"os"
+	"minigit/utils"
 )
 
 func main() {
@@ -12,7 +13,24 @@ func main() {
 		return
 	}
 
-	switch os.Args[1] {
+	command := os.Args[1]
+	
+	blockedDuringMerge := map[string]bool{
+		"merge":    true,
+		"checkout": true,
+		"reset":    true,
+		"rebase":   true,
+		"revert":   true,
+	}
+
+	if utils.MergeInProgress() && blockedDuringMerge[command] {
+		if !(command == "merge" && len(os.Args) >= 3 && os.Args[2] == "--abort") {
+			fmt.Printf("Cannot run '%s': a merge is in progress. Use 'minigit merge --abort' or 'commit' to finish.\n", command)
+			return
+		}
+	}
+
+	switch command {
 	case "init":
 		cmd.InitCommand()
 	
@@ -62,11 +80,13 @@ func main() {
 		cmd.Checkout(os.Args[2])
 
 	case "merge":
-		if len(os.Args) < 3 {
-			fmt.Println("Usage: minigit merge <branch_name>")
-			return
+		if len(os.Args) == 3 && os.Args[2] == "--abort" {
+			cmd.MergeAbort()
+		} else if len(os.Args) < 3 {
+			fmt.Println("Usage: minigit merge <branch_name> or minigit merge --abort")
+		} else {
+			cmd.Merge(os.Args[2])
 		}
-		cmd.Merge(os.Args[2])
 
 	case "revert":
 		if len(os.Args) < 3 {

@@ -133,12 +133,22 @@ Change de branche.
 
 ---
 
-### 12. `merge`
+### 12.0 `merge`
 
 Fusionne une branche dans la branche actuelle.
 
 ```bash
 ./minigit merge <branch_name>
+```
+
+---
+
+### 12.1 `merge --abort`
+
+Restaure tous les fichiers du disque à l’état exact du dernier commit sur la branche courante (avant le merge).
+
+```bash
+./minigit merge --abort
 ```
 
 ---
