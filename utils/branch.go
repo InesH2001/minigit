@@ -1,4 +1,3 @@
-// utils/branch.go
 package utils
 
 import (
