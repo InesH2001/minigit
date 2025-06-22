@@ -2,58 +2,21 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
+	"minigit/core"
 )
 
 func Branch(name string) {
 	if name == "" {
-		branches, err := filepath.Glob(".miniGit/refs/heads/*")
+		err := core.DisplayBranches()
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error: %v\n", err)
 		}
-
-		headData, err := os.ReadFile(".miniGit/HEAD")
+	} else {
+		err := core.CreateBranch(name)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error creating branch: %v\n", err)
+			return
 		}
-		headRef := strings.TrimSpace(string(headData))
-		currentBranch := strings.TrimPrefix(headRef, "ref: refs/heads/")
-
-		for _, branchPath := range branches {
-			branchName := filepath.Base(branchPath)
-
-			if branchName == currentBranch {
-				fmt.Print("* ")
-				fmt.Println(branchName)
-			} else {
-				fmt.Println("  " + branchName)
-			}
-		}
-		return
+		fmt.Printf("Branch '%s' created\n", name)
 	}
-
-	headData, err := os.ReadFile(".miniGit/HEAD")
-	if err != nil {
-		panic(err)
-	}
-	headRef := strings.TrimSpace(string(headData))
-	if !strings.HasPrefix(headRef, "ref: ") {
-		panic("Invalid HEAD format")
-	}
-	refPath := strings.TrimPrefix(headRef, "ref: ")
-
-	commitHashBytes, err := os.ReadFile(".miniGit/" + refPath)
-	if err != nil {
-		panic(err)
-	}
-	commitHash := strings.TrimSpace(string(commitHashBytes))
-
-	err = os.WriteFile(".miniGit/refs/heads/"+name, []byte(commitHash), 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Branch '%s' created at commit %s\n", name, commitHash)
 }

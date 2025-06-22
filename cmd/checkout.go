@@ -2,24 +2,14 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"strings"
+	"minigit/core"
 )
 
-func Checkout(name string) {
-	branchPath := ".miniGit/refs/heads/" + name
-
-	commitHashBytes, err := os.ReadFile(branchPath)
+func Checkout(branchName string) {
+	err := core.SwitchToBranch(branchName)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error switching to branch: %v\n", err)
+		return
 	}
-	commitHash := strings.TrimSpace(string(commitHashBytes))
-
-	headContent := "ref: refs/heads/" + name
-	err = os.WriteFile(".miniGit/HEAD", []byte(headContent), 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Switched to branch '%s' (commit %s)\n", name, commitHash)
+	fmt.Printf("Switched to branch '%s'\n", branchName)
 }
