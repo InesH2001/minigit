@@ -5,7 +5,6 @@ import (
 	"minigit/utils"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 func ListBranches() ([]string, error) {
@@ -28,20 +27,6 @@ func ListBranches() ([]string, error) {
 	}
 
 	return branches, nil
-}
-
-func GetCurrentBranchName() (string, error) {
-	headData, err := os.ReadFile(".miniGit/HEAD")
-	if err != nil {
-		return "", fmt.Errorf("failed to read HEAD: %w", err)
-	}
-
-	headRef := strings.TrimSpace(string(headData))
-	if !strings.HasPrefix(headRef, "ref: refs/heads/") {
-		return "", fmt.Errorf("HEAD is not pointing to a branch")
-	}
-
-	return strings.TrimPrefix(headRef, "ref: refs/heads/"), nil
 }
 
 func CreateBranch(name string) error {
@@ -68,9 +53,9 @@ func SwitchToBranch(branchName string) error {
 		return fmt.Errorf("branch '%s' does not exist", branchName)
 	}
 
-	currentBranch, err := GetCurrentBranchName()
-	if err != nil {
-		return fmt.Errorf("failed to get current branch: %w", err)
+	currentBranch := utils.GetCurrentBranchName()
+	if currentBranch == "" {
+		return fmt.Errorf("failed to get current branch")
 	}
 
 	if currentBranch == branchName {
@@ -96,6 +81,7 @@ func SwitchToBranch(branchName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to update HEAD: %w", err)
 	}
+
 	err = utils.WriteFile(".miniGit/index", []byte(""))
 	if err != nil {
 		return fmt.Errorf("failed to clear index: %w", err)
@@ -106,9 +92,9 @@ func SwitchToBranch(branchName string) error {
 
 func restoreWorkingDirectory(commitHash string) error {
 	targetTree := utils.ReadTreeFromCommit(commitHash)
-	currentBranch, err := GetCurrentBranchName()
-	if err != nil {
-		return fmt.Errorf("failed to get current branch: %w", err)
+	currentBranch := utils.GetCurrentBranchName()
+	if currentBranch == "" {
+		return fmt.Errorf("failed to get current branch")
 	}
 
 	currentCommitHash, err := utils.GetCommitHashFromRef("refs/heads/" + currentBranch)
@@ -117,6 +103,7 @@ func restoreWorkingDirectory(commitHash string) error {
 	}
 
 	currentTree := utils.ReadTreeFromCommit(currentCommitHash)
+
 	for filePath := range currentTree {
 		if _, exists := targetTree[filePath]; !exists {
 			err := os.Remove(filePath)
@@ -125,6 +112,7 @@ func restoreWorkingDirectory(commitHash string) error {
 			}
 		}
 	}
+
 	currentIndex, err := utils.ReadIndex()
 	if err != nil {
 		return fmt.Errorf("failed to read current index: %w", err)
@@ -134,10 +122,10 @@ func restoreWorkingDirectory(commitHash string) error {
 		if _, exists := targetTree[filePath]; !exists {
 			err := os.Remove(filePath)
 			if err != nil && !os.IsNotExist(err) {
-
 			}
 		}
 	}
+
 	for filePath, blobHash := range targetTree {
 		content := utils.GetBlobContent(blobHash)
 		err := utils.WriteFile(filePath, []byte(content))
