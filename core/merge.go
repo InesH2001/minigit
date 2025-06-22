@@ -21,10 +21,25 @@ func Merge(branchName string) error {
         return err
     }
 
+    if branchName == utils.GetCurrentBranchName() {
+	    return fmt.Errorf("cannot merge a branch with itself")
+    }
+    
     branchCommitHash, err := utils.GetCommitHashFromRef("refs/heads/" + branchName)
     if err != nil {
         return err
     }
+    
+    if utils.AreTreesEqual(headCommitHash, branchCommitHash) {
+        fmt.Println("Branches are identical. Nothing to merge.")
+        return nil
+    }
+    
+    err = os.WriteFile(".miniGit/MERGE_HEAD", []byte(headCommitHash), 0644)
+    if err != nil {
+        return fmt.Errorf("failed to save merge state: %w", err)
+    }
+    
     commonAncestorHash := findCommonCommitAncestorHash(headCommitHash, branchCommitHash)
 
     headBlobs := utils.ReadTreeFromCommit(headCommitHash)
@@ -70,9 +85,13 @@ func Merge(branchName string) error {
         err := Commit(CommitParams{
             Message: "Merge branch '" + branchName + "'",
             Author:  "MiniGit",
-        })
+        })  
         if err != nil {
             return fmt.Errorf("failed to commit merge: %w", err)
+        }
+        
+        if err := os.Remove(".miniGit/MERGE_HEAD"); err != nil {
+            return fmt.Errorf("failed to remove MERGE_HEAD: %w", err)
         }
     }
     return nil
@@ -141,6 +160,34 @@ func findCommonCommitAncestorHash(commit1, commit2 string) string {
     }
 
     return ""
+}
+
+func MergeAbort() error {
+    data, err := os.ReadFile(".miniGit/MERGE_HEAD")
+    if err != nil {
+        return fmt.Errorf("No merge in progress or unable to read MERGE_HEAD: %w", err)
+    }
+
+    commitHash := strings.TrimSpace(string(data))
+
+    tree := utils.ReadTreeFromCommit(commitHash)
+    for file, blobHash := range tree {
+        content := utils.GetBlobContent(blobHash)
+        if err := os.WriteFile(file, []byte(content), 0644); err != nil {
+            return fmt.Errorf("failed to restore file %s: %w", file, err)
+        }
+    }
+
+    if err := os.Remove(".miniGit/MERGE_HEAD"); err != nil {
+        return fmt.Errorf("failed to remove MERGE_HEAD: %w", err)
+    }
+
+    if err := utils.WriteFile(".miniGit/index", []byte("")); err != nil {
+        return fmt.Errorf("commit succeeded, but failed to clear index after merge: %w", err)
+    }
+
+    fmt.Println("Merge aborted. Working directory restored to previous commit.")
+    return nil
 }
 
 

@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"minigit/utils"
+	"os"
 	"strings"
 	"time"
 )
@@ -13,9 +14,17 @@ type CommitParams struct {
 }
 
 func Commit(params CommitParams) error {
+	if utils.FileExists(".miniGit/MERGE_HEAD") {
+    	_ = os.Remove(".miniGit/MERGE_HEAD")
+	}
+
 	index, err := utils.ReadIndex()
 	if err != nil {
 		return err
+	}
+
+	if len(index) == 0 {
+		return fmt.Errorf("no files staged for commit")
 	}
 	
 	headRef, parentHash, err := utils.GetCurrentBranchAndParentCommitHash()
@@ -25,6 +34,11 @@ func Commit(params CommitParams) error {
 
 	treeContent := buildTree(index, parentHash)
 	treeHash := utils.HashContent([]byte(treeContent))
+
+	oldTreeHash := utils.GetTreeHashFromCommit(parentHash)
+	if treeHash == oldTreeHash {
+		return fmt.Errorf("no changes since last commit")
+	}
 
 	if err := utils.WriteTree(treeHash, treeContent); err != nil {
 		return err
