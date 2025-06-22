@@ -15,6 +15,11 @@ func Add(filePath string) error {
 		return nil
 	}
 
+	if utils.IsIgnored(filePath) {
+		fmt.Printf("Ignore : %s (gitignore)\n", filePath)
+		return nil
+	}
+
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return err

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"minigit/cmd"
-	"os"
 	"minigit/utils"
+	"os"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	}
 
 	command := os.Args[1]
-	
+
 	blockedDuringMerge := map[string]bool{
 		"merge":    true,
 		"checkout": true,
@@ -33,12 +33,12 @@ func main() {
 	switch command {
 	case "init":
 		cmd.InitCommand()
-	
+
 	case "set-user":
-    	cmd.SetUserCommand(os.Args[2:])	
-	
+		cmd.SetUserCommand(os.Args[2:])
+
 	case "get-user":
-    	cmd.GetUserCommand()
+		cmd.GetUserCommand()
 
 	case "add":
 		if len(os.Args) < 3 {
@@ -94,13 +94,16 @@ func main() {
 			return
 		}
 		cmd.Revert(os.Args[2:])
-	
+
 	case "rm":
 		if len(os.Args) < 1 {
 			fmt.Println("Usage: minigit rm [--cached] [-f] <file>")
 			return
 		}
 		cmd.RmCommand(os.Args[2:])
+
+	case "stash":
+		cmd.StashCommand(os.Args[2:])
 
 	default:
 		fmt.Println("Unknown command. See 'minigit help'")
