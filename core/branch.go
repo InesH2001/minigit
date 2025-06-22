@@ -29,6 +29,28 @@ func ListBranches() ([]string, error) {
 	return branches, nil
 }
 
+func DisplayBranches() error {
+	branches, err := ListBranches()
+	if err != nil {
+		return fmt.Errorf("error listing branches: %w", err)
+	}
+
+	currentBranch := utils.GetCurrentBranchName()
+	if currentBranch == "" {
+		return fmt.Errorf("failed to get current branch")
+	}
+
+	for _, branch := range branches {
+		if branch == currentBranch {
+			fmt.Printf("* %s\n", branch)
+		} else {
+			fmt.Printf("  %s\n", branch)
+		}
+	}
+
+	return nil
+}
+
 func CreateBranch(name string) error {
 	if utils.BranchExists(name) {
 		return fmt.Errorf("branch '%s' already exists", name)
