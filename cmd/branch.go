@@ -7,24 +7,9 @@ import (
 
 func Branch(name string) {
 	if name == "" {
-		branches, err := core.ListBranches()
+		err := core.DisplayBranches()
 		if err != nil {
-			fmt.Printf("Error listing branches: %v\n", err)
-			return
-		}
-
-		currentBranch, err := core.GetCurrentBranchName()
-		if err != nil {
-			fmt.Printf("Error getting current branch: %v\n", err)
-			return
-		}
-
-		for _, branch := range branches {
-			if branch == currentBranch {
-				fmt.Printf("* %s\n", branch)
-			} else {
-				fmt.Printf("  %s\n", branch)
-			}
+			fmt.Printf("Error: %v\n", err)
 		}
 	} else {
 		err := core.CreateBranch(name)
