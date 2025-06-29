@@ -24,9 +24,9 @@ func Stash(message string) error {
 		return fmt.Errorf("no changes to stash")
 	}
 
-	currentBranch, err := GetCurrentBranchName()
-	if err != nil {
-		return fmt.Errorf("failed to get current branch: %w", err)
+	currentBranch := utils.GetCurrentBranchName()
+	if currentBranch == "" {
+		return fmt.Errorf("failed to get current branch")
 	}
 
 	if message == "" {
@@ -288,9 +288,9 @@ func restoreStash(stash StashEntry) error {
 }
 
 func cleanWorkingDirectory() error {
-	currentBranch, err := GetCurrentBranchName()
-	if err != nil {
-		return err
+	currentBranch := utils.GetCurrentBranchName()
+	if currentBranch == "" {
+		return fmt.Errorf("failed to get current branch")
 	}
 
 	commitHash, err := utils.GetCommitHashFromRef("refs/heads/" + currentBranch)

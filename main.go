@@ -24,7 +24,8 @@ func main() {
 	}
 
 	if utils.MergeInProgress() && blockedDuringMerge[command] {
-		if !(command == "merge" && len(os.Args) >= 3 && os.Args[2] == "--abort") {
+		if !(command == "merge" && len(os.Args) >= 3 && os.Args[2] == "--abort") &&
+			!(command == "rebase" && len(os.Args) >= 3 && os.Args[2] == "--abort") {
 			fmt.Printf("Cannot run '%s': a merge is in progress. Use 'minigit merge --abort' or 'commit' to finish.\n", command)
 			return
 		}
@@ -66,11 +67,7 @@ func main() {
 		cmd.Help()
 
 	case "branch":
-		branchName := ""
-		if len(os.Args) >= 3 {
-			branchName = os.Args[2]
-		}
-		cmd.Branch(branchName)
+		cmd.Branch(os.Args[2:])
 
 	case "checkout":
 		if len(os.Args) < 3 {
@@ -86,6 +83,15 @@ func main() {
 			fmt.Println("Usage: minigit merge <branch_name> or minigit merge --abort")
 		} else {
 			cmd.Merge(os.Args[2])
+		}
+
+	case "rebase":
+		if len(os.Args) == 3 && os.Args[2] == "--abort" {
+			cmd.Rebase([]string{"--abort"})
+		} else if len(os.Args) < 3 {
+			fmt.Println("Usage: minigit rebase <branch_name> or minigit rebase --abort")
+		} else {
+			cmd.Rebase(os.Args[2:])
 		}
 
 	case "revert":
