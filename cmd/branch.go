@@ -14,6 +14,7 @@ func Branch(args []string) {
 		}
 		return
 	}
+
 	var action, branchName, newName string
 	force := false
 
