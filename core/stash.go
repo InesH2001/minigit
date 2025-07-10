@@ -277,11 +277,15 @@ func restoreStash(stash StashEntry) error {
 	}
 
 	for filePath, hash := range stash.WorkDir {
-		content := utils.GetBlobContent(hash)
-		err := utils.WriteFile(filePath, []byte(content))
+		content, err := utils.ReadAndDecompressBlob(hash)
 		if err != nil {
-			return fmt.Errorf("failed to restore file %s: %w", filePath, err)
+			return fmt.Errorf("failed to read blob %s: %w", hash, err)
 		}
+
+		if err := utils.WriteFile(filePath, content); err != nil {
+			return fmt.Errorf("failed to write file %s: %w", filePath, err)
+		}
+
 	}
 
 	return nil

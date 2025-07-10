@@ -49,9 +49,9 @@ func Reset(commitHash string) error {
 		filePath := parts[0]
 		hash := parts[1]
 
-		content, err := os.ReadFile(".miniGit/objects/blobs/" + hash)
+		content, err := utils.ReadAndDecompressBlob(hash)
 		if err != nil {
-			return fmt.Errorf("missing blob: %s (%v)", hash, err)
+			return fmt.Errorf("failed to read blob %s: %w", hash, err)
 		}
 
 		if err := utils.WriteFile(filePath, content); err != nil {

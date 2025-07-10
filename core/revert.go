@@ -2,9 +2,9 @@ package core
 
 import (
 	"fmt"
+	"minigit/utils"
 	"os"
 	"strings"
-	"minigit/utils"
 )
 
 func Revert(commitHash string, author string) error {
@@ -76,8 +76,11 @@ func readTree(treeHash string) (map[string]string, error) {
 func restoreFiles(tree map[string]string) (map[string]string, error) {
 	index := make(map[string]string)
 	for path, hash := range tree {
-		content := utils.GetBlobContent(hash)
-		err := os.WriteFile(path, []byte(content), 0644)
+		content, err := utils.ReadAndDecompressBlob(hash)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read blob %s: %w", hash, err)
+		}
+		err = os.WriteFile(path, content, 0644)
 		if err != nil {
 			return nil, fmt.Errorf("failed to restore %s: %w", path, err)
 		}

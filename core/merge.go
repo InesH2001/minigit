@@ -49,25 +49,35 @@ func Merge(branchName string) error {
 	allFiles := utils.GetUniqueUnionKeys(headBlobs, branchBlobs, baseBlobs)
 
 	for _, file := range allFiles {
-		base := utils.GetBlobContent(baseBlobs[file])
-		head := utils.GetBlobContent(headBlobs[file])
-		branch := utils.GetBlobContent(branchBlobs[file])
+		base, err := utils.ReadAndDecompressBlob(baseBlobs[file])
+		if err != nil {
+			base = []byte{}
+		}
 
-		merged := mergeThreeVersions(base, head, branch, branchName)
+		head, err := utils.ReadAndDecompressBlob(headBlobs[file])
+		if err != nil {
+			head = []byte{}
+		}
 
-		err := os.WriteFile(file, []byte(merged), 0644)
+		branch, err := utils.ReadAndDecompressBlob(branchBlobs[file])
+		if err != nil {
+			branch = []byte{}
+		}
+
+		merged := mergeThreeVersions(string(base), string(head), string(branch), branchName)
+
+		err = os.WriteFile(file, []byte(merged), 0644)
 		if err != nil {
 			return err
 		}
 
 		if strings.Contains(merged, "<<<<<<<") {
 			hasConflict = true
-			fmt.Printf("⚠️ Conflict detected in %s. Please resolve manually. ⚠️\n", file)
-		} else if merged != base {
+			fmt.Printf("Conflict detected in %s. Please resolve manually. ⚠️\n", file)
+		} else if merged != string(base) {
 			fmt.Printf("Merge completed without conflict for %s.\n", file)
 			modifiedFiles = append(modifiedFiles, file)
 		}
-
 	}
 
 	if !hasConflict {
@@ -165,15 +175,18 @@ func findCommonCommitAncestorHash(commit1, commit2 string) string {
 func MergeAbort() error {
 	data, err := os.ReadFile(".miniGit/MERGE_HEAD")
 	if err != nil {
-		return fmt.Errorf("No merge in progress or unable to read MERGE_HEAD: %w", err)
+		return fmt.Errorf("no merge in progress or unable to read MERGE_HEAD: %w", err)
 	}
 
 	commitHash := strings.TrimSpace(string(data))
 
 	tree := utils.ReadTreeFromCommit(commitHash)
 	for file, blobHash := range tree {
-		content := utils.GetBlobContent(blobHash)
-		if err := os.WriteFile(file, []byte(content), 0644); err != nil {
+		content, err := utils.ReadAndDecompressBlob(blobHash)
+		if err != nil {
+			content = []byte{}
+		}
+		if err := os.WriteFile(file, content, 0644); err != nil {
 			return fmt.Errorf("failed to restore file %s: %w", file, err)
 		}
 	}
