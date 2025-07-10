@@ -219,7 +219,12 @@ func applyCommit(commit CommitInfo) error {
 
 	hasChanges := false
 	for filePath, blobHash := range commit.Tree {
-		commitContent := utils.GetBlobContent(blobHash)
+		content, err := utils.ReadAndDecompressBlob(blobHash)
+		if err != nil {
+			return fmt.Errorf("failed to read and decompress blob %s: %w", blobHash, err)
+		}
+		commitContent := string(content)
+
 		currentContent := baseFiles[filePath]
 		if baseOfRebaseFiles[filePath] {
 		} else {
