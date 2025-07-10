@@ -32,6 +32,11 @@ func InitRepo() error {
 		return fmt.Errorf("error creating HEAD file: %v", err)
 	}
 
+	mainBranchPath := filepath.Join(miniGitPath, "refs", "heads", "main")
+	if err := os.WriteFile(mainBranchPath, []byte(""), 0644); err != nil {
+		return fmt.Errorf("error creating main branch ref: %v", err)
+	}
+
 	indexPath := filepath.Join(miniGitPath, "index")
 	if err := os.WriteFile(indexPath, []byte(""), 0644); err != nil {
 		return fmt.Errorf("error creating index file: %v", err)
