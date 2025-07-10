@@ -3,10 +3,8 @@ package utils
 import (
 	"bytes"
 	"compress/gzip"
-	"io"
 )
 
-// Compress compresses a byte slice using gzip
 func Compress(data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	gzipWriter := gzip.NewWriter(&buf)
@@ -21,14 +19,4 @@ func Compress(data []byte) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
-}
-
-func Decompress(data []byte) ([]byte, error) {
-	reader, err := gzip.NewReader(bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-	defer reader.Close()
-
-	return io.ReadAll(reader)
 }
