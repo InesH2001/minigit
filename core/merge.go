@@ -99,10 +99,6 @@ func Merge(branchName string) error {
 		if err != nil {
 			return fmt.Errorf("failed to commit merge: %w", err)
 		}
-
-		if err := os.Remove(".miniGit/MERGE_HEAD"); err != nil {
-			return fmt.Errorf("failed to remove MERGE_HEAD: %w", err)
-		}
 	}
 	return nil
 }

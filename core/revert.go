@@ -8,17 +8,28 @@ import (
 )
 
 func Revert(commitHash string, author string) error {
-	treeHash, message, err := loadCommitMeta(commitHash)
+	treeHash, parentCommitHash, message, err := loadCommitMeta(commitHash)
 	if err != nil {
 		return err
 	}
 
-	tree, err := readTree(treeHash)
+	targetTree, err := readTree(treeHash)
 	if err != nil {
 		return err
 	}
 
-	index, err := restoreFiles(tree)
+	parentTreeHash, _, _, err := loadCommitMeta(parentCommitHash)
+	if err != nil {
+		return err
+	}
+
+	parentTree, err := readTree(parentTreeHash)
+	if err != nil {
+		return err
+	}
+
+	diff := computeInverseDiff(parentTree, targetTree)
+	index, err := applyDiff(diff)
 	if err != nil {
 		return err
 	}
@@ -29,15 +40,15 @@ func Revert(commitHash string, author string) error {
 
 	return Commit(CommitParams{
 		Author:  author,
-		Message: fmt.Sprintf("Revert \"%s\"", message),
+		Message: fmt.Sprintf("Revert \"%s\"", strings.ReplaceAll(message, "\"", "'")),
 	})
 }
 
-func loadCommitMeta(commitHash string) (treeHash string, message string, err error) {
+func loadCommitMeta(commitHash string) (treeHash string, parentHash string, message string, err error) {
 	commitPath := ".miniGit/objects/commits/" + commitHash
 	data, err := os.ReadFile(commitPath)
 	if err != nil {
-		return "", "", fmt.Errorf("commit not found: %w", err)
+		return "", "", "", fmt.Errorf("commit not found: %w", err)
 	}
 
 	lines := strings.Split(string(data), "\n")
@@ -45,11 +56,14 @@ func loadCommitMeta(commitHash string) (treeHash string, message string, err err
 		if strings.HasPrefix(line, "tree: ") {
 			treeHash = strings.TrimPrefix(line, "tree: ")
 		}
+		if strings.HasPrefix(line, "parent: ") {
+            parentHash = strings.TrimPrefix(line, "parent: ")
+        }
 		if strings.HasPrefix(line, "message: ") {
 			message = strings.TrimPrefix(line, "message: ")
 		}
 	}
-	return treeHash, message, nil
+	return treeHash, parentHash, message, nil
 }
 
 func readTree(treeHash string) (map[string]string, error) {
@@ -73,18 +87,48 @@ func readTree(treeHash string) (map[string]string, error) {
 	return tree, nil
 }
 
-func restoreFiles(tree map[string]string) (map[string]string, error) {
-	index := make(map[string]string)
-	for path, hash := range tree {
-		content, err := utils.ReadAndDecompressBlob(hash)
-		if err != nil {
-			return nil, fmt.Errorf("failed to read blob %s: %w", hash, err)
+func computeInverseDiff(parentTree, targetTree map[string]string) map[string]*string {
+	diff := make(map[string]*string)
+
+	for path, targetHash := range targetTree {
+		parentHash, exists := parentTree[path]
+		if !exists {
+			diff[path] = nil
+		} else if parentHash != targetHash {
+			diff[path] = &parentHash
 		}
-		err = os.WriteFile(path, content, 0644)
-		if err != nil {
-			return nil, fmt.Errorf("failed to restore %s: %w", path, err)
-		}
-		index[path] = hash
 	}
+
+	for path, parentHash := range parentTree {
+		if _, exists := targetTree[path]; !exists {
+			diff[path] = &parentHash
+		}
+	}
+
+	return diff
+}
+
+func applyDiff(diff map[string]*string) (map[string]string, error) {
+	index := make(map[string]string)
+
+	for path, blobHash := range diff {
+		if blobHash == nil {
+			err := os.Remove(path)
+			if err != nil && !os.IsNotExist(err) {
+				return nil, fmt.Errorf("failed to delete %s: %w", path, err)
+			}
+		} else {
+			content, err := utils.ReadAndDecompressBlob(*blobHash)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read blob %s: %w", *blobHash, err)
+			}
+			err = os.WriteFile(path, content, 0644)
+			if err != nil {
+				return nil, fmt.Errorf("failed to restore file %s: %w", path, err)
+			}
+			index[path] = *blobHash
+		}
+	}
+
 	return index, nil
 }
