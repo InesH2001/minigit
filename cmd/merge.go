@@ -12,3 +12,10 @@ func Merge(branchName string) {
 		return
 	}
 }
+
+func MergeAbort() {
+    err := core.MergeAbort()
+    if err != nil {
+        fmt.Println("Merge abort failed:", err)
+    }
+}

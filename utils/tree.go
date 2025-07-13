@@ -5,17 +5,19 @@ import (
 	"strings"
 )
 
-func ReadTreeFromCommit(commitID string) map[string]string {
+func GetTreeHashFromCommit(commitID string) string {
 	data, _ := os.ReadFile(".miniGit/objects/commits/" + commitID)
 	lines := strings.Split(string(data), "\n")
-
-	var treeHash string
 	for _, line := range lines {
 		if strings.HasPrefix(line, "tree: ") {
-			treeHash = strings.TrimSpace(strings.TrimPrefix(line, "tree: "))
-			break
+			return strings.TrimSpace(strings.TrimPrefix(line, "tree: "))
 		}
 	}
+	return ""
+}
+
+func ReadTreeFromCommit(commitID string) map[string]string {
+	treeHash := GetTreeHashFromCommit(commitID)
 
 	files := make(map[string]string)
 	if treeHash != "" {
@@ -35,6 +37,13 @@ func ReadTreeFromCommit(commitID string) map[string]string {
 		}
 	}
 	return files
+}
+
+func AreTreesEqual(commitA, commitB string) bool {
+	treeHashA := GetTreeHashFromCommit(commitA)
+	treeHashB := GetTreeHashFromCommit(commitB)
+
+	return treeHashA != "" && treeHashA == treeHashB
 }
 
 func WriteTree(treeHash, content string) error {

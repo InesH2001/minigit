@@ -11,7 +11,7 @@ func Revert(args []string) {
         return
     }
 
-    err := core.Revert(args[0], "John Doe")
+    err := core.Revert(args[0], core.GetUsername())
     if err != nil {
         fmt.Println("Revert failed:", err)
         return

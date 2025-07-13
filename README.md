@@ -36,6 +36,8 @@ Modifie le nom d'utilisateur pour les futurs commits.
 ./minigit set-user <username>
 ```
 
+► Crée ou écrase le fichier .miniGit/config contenant le nom d'utilisateur (ex: John Doe).
+
 ---
 
 ### 3. `get-user`
@@ -45,6 +47,8 @@ Affiche le nom d'utilisateur actuellement configuré.
 ```bash
 ./minigit get-user
 ```
+
+► Lit simplement le fichier .miniGit/config
 
 ---
 
@@ -133,13 +137,79 @@ Change de branche.
 
 ---
 
-### 12. `merge`
+### 12.0 `merge`
 
 Fusionne une branche dans la branche actuelle.
 
 ```bash
 ./minigit merge <branch_name>
 ```
+
+► Ce que la commande modifie :
+
+- Crée un fichier temporaire .miniGit/MERGE_HEAD pour indiquer qu'une fusion est en cours
+
+- Charge les trees de :
+
+    - la branche courante (HEAD)
+
+    - la branche à merger
+
+    - leur ancêtre commun (via findCommonCommitAncestorHash)
+
+    - Ces trees sont extraits depuis .miniGit/objects/commits/<hash> (ligne tree: ...), puis chargés via .miniGit/objects/trees/<tree_hash>
+
+- Compare chaque fichier dans les trois trees et applique un merge à 3 voies :
+
+    - Si HEAD et la branche sont identiques → le fichier n'est pas modifié.
+
+    - Si les contenus divergent → un fichier fusionné est généré :
+
+        - sans conflit : le fichier est directement mis à jour
+
+        - avec conflit : les marqueurs <<<<<<<, =======, >>>>>>> sont insérés dans le fichier
+
+- Si aucun conflit :
+
+    - Les fichiers fusionnés sont sauvegardés sur le disque
+
+    - Un blob est créé pour chaque fichier modifié dans .miniGit/objects/blobs/<hash>
+
+    - Le fichier .miniGit/index est mis à jour avec les nouveaux hash (comme après un add)
+
+    - Un nouveau tree est généré dans .miniGit/objects/trees/<hash>
+
+    - Un commit de merge est créé dans .miniGit/objects/commits/<hash>, avec deux parents (HEAD et la branche fusionnée)
+
+    - Le fichier .miniGit/MERGE_HEAD est supprimé à la fin
+
+- Si conflit :
+
+    - Aucun commit n'est créé automatiquement
+
+    - Le fichier .miniGit/MERGE_HEAD reste présent
+
+    - L’utilisateur doit résoudre manuellement les conflits, faire un add des fichiers corrigés, puis un commit pour terminer le merge
+
+---
+
+### 12.1 `merge --abort`
+
+Restaure tous les fichiers du disque à l’état exact du dernier commit sur la branche courante (avant le merge).
+
+```bash
+./minigit merge --abort
+```
+
+► Ce que la commande modifie :
+
+- Lit .miniGit/MERGE_HEAD pour retrouver le commit HEAD précédent
+
+- Restaure tous les fichiers du disque à partir du tree de ce commit (.miniGit/objects/trees<tree_hash>)
+
+- Vide le fichier .miniGit/index (reset complet de la staging area)
+
+- Supprime .miniGit/MERGE_HEAD
 
 ---
 
@@ -150,6 +220,26 @@ Annule les changements d’un commit donné (en créant un commit inverse).
 ```bash
 ./minigit revert <hash_commit>
 ```
+
+► Ce que la commande modifie :
+
+- Lit .miniGit/objects/commits/<hash_commit_ciblé> et son commit parent
+
+- Récupère les fichiers .miniGit/objects/trees/<tree_hash> de ces deux commits
+
+- Compare les arbres pour calculer le diff inverse
+
+- Applique ce diff sur les fichiers du disque
+
+- Met à jour le fichier .miniGit/index avec les nouveaux blobs (comme un add)
+
+- Crée un nouveau commit dans .miniGit/objects/commits/ avec :
+
+    - un nouveau tree dans .miniGit/objects/trees/
+
+    - les blobs modifiés dans .miniGit/objects/blobs/ (si nécessaires)
+
+    - le message Revert "<message d'origine>"
 
 ---
 
@@ -171,6 +261,15 @@ Supprime un fichier du disque et/ou de l’index.
 ```bash
 ./minigit rm -f <fichier>
 ```
+
+► Ce que la commande modifie :
+
+- Supprime le fichier du disque (sauf si --cached)
+
+- Met à jour .miniGit/index en supprimant l’entrée du fichier ou en la remplaçant par un hash vide ("")
+
+- Le commit suivant enregistrera la suppression définitive dans un nouveau tree + commit
+
 
 ---
 
