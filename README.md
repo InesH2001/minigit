@@ -192,6 +192,7 @@ Réinitialise l’index (retire tous les fichiers du staging area, sans modifier
 ```
 
 ► Replace l’état du projet (fichiers + index + HEAD) sur un commit antérieur donné, supprimant les modifications ultérieures.
+
 ---
 
 ### 10. `branch`
