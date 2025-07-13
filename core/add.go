@@ -59,11 +59,16 @@ func Add(filePath string) error {
 
 	blobPath := filepath.Join(".miniGit", "objects", "blobs", hash)
 	if !utils.FileExists(blobPath) {
-		err := os.WriteFile(blobPath, content, 0644)
+		compressedContent, err := utils.Compress(content)
+		if err != nil {
+			return fmt.Errorf("compression failed for %s: %v", filePath, err)
+		}
+
+		err = os.WriteFile(blobPath, compressedContent, 0644)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Blob created : %s\n", hash)
+		fmt.Printf("Blob created (compressed): %s\n", hash)
 	}
 
 	index[filePath] = hash

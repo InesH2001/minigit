@@ -21,8 +21,7 @@ func Diff() error {
 			continue
 		}
 
-		blobPath := ".miniGit/objects/blobs/" + hash
-		indexedContent, err := os.ReadFile(blobPath)
+		indexedContent, err := utils.ReadAndDecompressBlob(hash)
 		if err != nil {
 			fmt.Printf("Blob not find for %s\n", filePath)
 			continue

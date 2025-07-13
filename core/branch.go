@@ -149,8 +149,12 @@ func restoreWorkingDirectory(commitHash string) error {
 	}
 
 	for filePath, blobHash := range targetTree {
-		content := utils.GetBlobContent(blobHash)
-		err := utils.WriteFile(filePath, []byte(content))
+		content, err := utils.ReadAndDecompressBlob(blobHash)
+		if err != nil {
+			return fmt.Errorf("failed to read blob %s: %w", blobHash, err)
+		}
+		err = utils.WriteFile(filePath, content)
+
 		if err != nil {
 			return fmt.Errorf("failed to restore file %s: %w", filePath, err)
 		}
