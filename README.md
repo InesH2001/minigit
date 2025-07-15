@@ -26,6 +26,14 @@ Initialise un dépôt MiniGit (création du dossier `.miniGit`).
 ./minigit init
 ```
 
+► Initialise un nouveau dépôt MiniGit dans le dossier courant.
+Crée la structure .miniGit/ nécessaire pour gérer les versions.
+
+- Crée l’arborescence .miniGit/ pour commencer un dépôt MiniGit.
+- Initialise les dossiers pour les objets, les branches, l’index, et le fichier HEAD.
+- Pointe la HEAD sur la branche main.
+- Initialise aussi le fichier utilisateur .miniGit/config.
+
 ---
 
 ### 2. `set-user`
@@ -61,6 +69,14 @@ Ajoute un ou plusieurs fichiers à l'index (staging area).
 ./minigit add .   # ajoute tous les fichiers du dossier courant
 ```
 
+► Ajoute un fichier (ou un dossier) à l'index .miniGit/index, en le compressant s’il a changé depuis la dernière fois.
+
+ 3 cas possible : 
+
+- Fichier inexistant (nouveau fichier à ajouté ) : Fichier Hashé, blob compressé et index crée.
+- FIchier existant et inchangé : Ne fait rien et l'affiche dans les unchanged file.
+- Fichier existant et update : Nouveau Hash généré + nouveau blob compressé + ajout à l'index.
+
 ---
 
 ### 5. `commit`
@@ -70,6 +86,48 @@ Crée un commit avec les fichiers présents dans l’index.
 ```bash
 ./minigit commit -m "Message de commit"
 ```
+► Crée un nouveau commit avec les fichiers indexés, enregistre l'état (tree), l'auteur, le message, la date, et lie le commit au parent.
+
+- Lecture de l'index :
+Récupère les fichiers ajoutés (utils.ReadIndex()).
+
+- Refuse de continuer si aucun fichier n’est dans l’index.
+
+- Récupère la branche actuelle et le commit parent :
+Via utils.GetCurrentBranchAndParentCommitHash().
+
+- Construit l’arbre (tree) :
+
+Fichiers actuels du parent + fichiers dans l’index.
+
+- Créé via buildTree(), puis haché → treeHash.
+
+Si ce treeHash est identique à celui du commit parent → erreur “no changes”.
+
+- Écrit l’arbre (tree) dans .miniGit/objects/trees/<treeHash>.
+
+- Construit le commit :
+
+Avec buildCommit() → contient le tree, le parent, l’auteur, la date et le message.
+
+- Sauvegarde le commit dans .miniGit/objects/commits/<commitHash>.
+
+- Met à jour .miniGit/refs/heads/<branch> pour pointer vers ce nouveau commit.
+
+- Vide .miniGit/index.
+
+- Affiche un message avec le hash du commit.
+
+- buildTree(index, parentHash)
+Lit l’ancien arbre (commit parent).
+
+- Met à jour les fichiers selon l’index :
+
+- Ajoute/modifie les fichiers.
+
+- Supprime les fichiers si leur hash est vide.
+
+
 
 ---
 
@@ -93,6 +151,23 @@ Affiche les différences entre les fichiers présents dans le disque et ceux dan
 ```bash
 ./minigit diff
 ```
+► Compare les fichiers staged (indexés) avec leur contenu actuel dans le répertoire de travail, et affiche les lignes modifiées.
+
+- Lit l’index :
+→ Récupère les fichiers ajoutés (add) avec leur hash.
+
+- Boucle sur chaque fichier indexé :
+
+- Lit le contenu actuel du fichier (dans le répertoire de travail).
+
+- Lit la version compressée du fichier depuis .miniGit/objects/blobs/<hash>, puis la décompresse.
+
+- Compare le contenu actuel et l'ancien :
+
+S’ils diffèrent ➜ affiche la différence ligne par ligne (showLineDiff()).
+
+- Affichage du message.
+
 
 ---
 
@@ -103,6 +178,8 @@ Affiche l'historique des commits de la branche actuelle.
 ```bash
 ./minigit log
 ```
+► Affiche l’historique des commits de la branche actuelle, en remontant la chaîne des commits via leurs parents. Pour chaque commit : affiche son hash et son message
+
 
 ---
 
@@ -114,6 +191,8 @@ Réinitialise l’index (retire tous les fichiers du staging area, sans modifier
 ./minigit reset
 ```
 
+► Replace l’état du projet (fichiers + index + HEAD) sur un commit antérieur donné, supprimant les modifications ultérieures.
+
 ---
 
 ### 10. `branch`
@@ -124,6 +203,13 @@ Crée une nouvelle branche ou affiche les branches existantes.
 ./minigit branch           # liste les branches
 ./minigit branch <name>    # crée une nouvelle branche
 ```
+► Gére les branches dans MiniGit : création, affichage, changement, et restauration de l'état de travail.
+
+- Crée le fichier .miniGit/refs/heads/<name>.
+
+- Y écrit le hash du commit actuel (HEAD).
+
+- Échoue si la branche existe déjà.
 
 ---
 
